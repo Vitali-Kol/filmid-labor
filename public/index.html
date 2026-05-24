@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Filmid</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">Filmid</div>
+        <div class="nav-right">
+            <div id="auth-section">
+                <button class="btn btn-outline" onclick="showLogin()">Logi sisse</button>
+                <button class="btn btn-primary" onclick="showSignup()">Registreeru</button>
+            </div>
+            <div id="user-section" style="display:none;">
+                <span id="username-display" class="username"></span>
+                <button class="btn btn-outline" onclick="logout()">Logi välja</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Modal -->
+    <div id="modal" class="modal-overlay" style="display:none;">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal()">x</button>
+            <div id="modal-content"></div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Search and filter -->
+        <div class="search-bar">
+            <input type="text" id="search-input" placeholder="Otsi filmi..." oninput="searchMovies()">
+            <select id="genre-filter" onchange="filterByGenre()">
+                <option value="">Kõik žanrid</option>
+            </select>
+        </div>
+
+        <!-- Movies grid -->
+        <div id="movies-grid" class="movies-grid"></div>
+    </div>
+
+    <script>
+        let token = localStorage.getItem('token');
+        let currentUser = null;
+
+        // Init
+        async function init() {
+            await loadGenres();
+            await loadMovies();
+            if (token) await loadCurrentUser();
+        }
+
+        // Auth
+        async function loadCurrentUser() {
+            try {
+                const res = await fetch('/api/users/me', {
+                    headers: { 'Authorization': token }
+                });
+                if (res.ok) {
+                    currentUser = await res.json();
+                    document.getElementById('auth-section').style.display = 'none';
+                    document.getElementById('user-section').style.display = 'flex';
+                    document.getElementById('username-display').textContent = currentUser.name;
+                } else {
+                    token = null;
+                    localStorage.removeItem('token');
+                }
+            } catch (e) {}
+        }
+
+        function showLogin() {
+            document.getElementById('modal-content').innerHTML = `
+                <h2>Logi sisse</h2>
+                <div class="form-group">
+                    <label>Kasutajanimi</label>
+                    <input type="text" id="login-username" placeholder="kasutajanimi">
+                </div>
+                <div class="form-group">
+                    <label>Parool</label>
+                    <input type="password" id="login-password" placeholder="parool">
+                </div>
+                <div id="login-error" class="error-msg" style="display:none;"></div>
+                <button class="btn btn-primary w-full" onclick="login()">Logi sisse</button>
+                <p class="modal-switch">Pole kontot? <a href="#" onclick="showSignup()">Registreeru</a></p>
+                <p class="hint">Testikontod: mari / 1234 või jaan / 1234</p>
+            `;
+            document.getElementById('modal').style.display = 'flex';
+        }
+
+        function showSignup() {
+            document.getElementById('modal-content').innerHTML = `
+                <h2>Registreeru</h2>
+                <div class="form-group">
+                    <label>Nimi</label>
+                    <input type="text" id="signup-name" placeholder="Sinu nimi">
+                </div>
+                <div class="form-group">
+                    <label>Kasutajanimi</label>
+                    <input type="text" id="signup-username" placeholder="kasutajanimi">
+                </div>
+                <div class="form-group">
+                    <label>Parool</label>
+                    <input type="password" id="signup-password" placeholder="parool">
+                </div>
+                <div id="signup-error" class="error-msg" style="display:none;"></div>
+                <button class="btn btn-primary w-full" onclick="signup()">Registreeru</button>
+                <p class="modal-switch">On juba konto? <a href="#" onclick="showLogin()">Logi sisse</a></p>
+            `;
+            document.getElementById('modal').style.display = 'flex';
+        }
+
+        async function login() {
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            const errorDiv = document.getElementById('login-error');
+
+            const res = await fetch('/api/users/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+                token = data.token;
+                localStorage.setItem('token', token);
+                currentUser = data.user;
+                document.getElementById('auth-section').style.display = 'none';
+                document.getElementById('user-section').style.display = 'flex';
+                document.getElementById('username-display').textContent = currentUser.name;
+                closeModal();
+                loadMovies();
+            } else {
+                errorDiv.textContent = data.error;
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        async function signup() {
+            const name = document.getElementById('signup-name').value;
+            const username = document.getElementById('signup-username').value;
+            const password = document.getElementById('signup-password').value;
+            const errorDiv = document.getElementById('signup-error');
+
+            const res = await fetch('/api/users/signup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, username, password })
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+                token = data.token;
+                localStorage.setItem('token', token);
+                currentUser = data.user;
+                document.getElementById('auth-section').style.display = 'none';
+                document.getElementById('user-section').style.display = 'flex';
+                document.getElementById('username-display').textContent = currentUser.name;
+                closeModal();
+                loadMovies();
+            } else {
+                errorDiv.textContent = data.error;
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        async function logout() {
+            await fetch('/api/users/logout', {
+                method: 'POST',
+                headers: { 'Authorization': token }
+            });
+            token = null;
+            currentUser = null;
+            localStorage.removeItem('token');
+            document.getElementById('auth-section').style.display = 'flex';
+            document.getElementById('user-section').style.display = 'none';
+            loadMovies();
+        }
+
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
+
+        // Movies
+        async function loadMovies() {
+            const res = await fetch('/api/movies');
+            const data = await res.json();
+            renderMovies(data.movies);
+        }
+
+        async function searchMovies() {
+            const query = document.getElementById('search-input').value;
+            document.getElementById('genre-filter').value = '';
+            if (!query) return loadMovies();
+
+            const res = await fetch(`/api/movies/search?title=${encodeURIComponent(query)}`);
+            const data = await res.json();
+            renderMovies(data.results);
+        }
+
+        async function filterByGenre() {
+            const genre = document.getElementById('genre-filter').value;
+            document.getElementById('search-input').value = '';
+            if (!genre) return loadMovies();
+
+            const res = await fetch(`/api/movies/genre/${encodeURIComponent(genre)}`);
+            const data = await res.json();
+            renderMovies(data.movies);
+        }
+
+        async function loadGenres() {
+            const res = await fetch('/api/movies/genres');
+            const data = await res.json();
+            const select = document.getElementById('genre-filter');
+            data.genres.forEach(g => {
+                const opt = document.createElement('option');
+                opt.value = g;
+                opt.textContent = g.charAt(0).toUpperCase() + g.slice(1);
+                select.appendChild(opt);
+            });
+        }
+
+        function renderMovies(movies) {
+            const grid = document.getElementById('movies-grid');
+            if (!movies || movies.length === 0) {
+                grid.innerHTML = '<p class="empty">Filme ei leitud.</p>';
+                return;
+            }
+
+            grid.innerHTML = movies.map(movie => `
+                <div class="movie-card" onclick="showMovie(${movie.id})">
+                    <div class="movie-genre">${movie.genre}</div>
+                    <h3 class="movie-title">${movie.title}</h3>
+                    <div class="movie-year">${movie.year}</div>
+                    <p class="movie-desc">${movie.description}</p>
+                    <div class="movie-footer">
+                        <div class="movie-rating">
+                            ${movie.avgRating ? `${movie.avgRating}/5 (${movie.ratingCount} hinnangut)` : 'Hinnanguid pole'}
+                        </div>
+                        <div class="stars">${renderStars(movie.avgRating)}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderStars(rating) {
+            if (!rating) return '';
+            const full = Math.round(rating);
+            return Array.from({length: 5}, (_, i) =>
+                `<span class="${i < full ? 'star-full' : 'star-empty'}">*</span>`
+            ).join('');
+        }
+
+        async function showMovie(id) {
+            const res = await fetch(`/api/movies/${id}`);
+            const movie = await res.json();
+
+            const ratingsHtml = movie.ratings.length > 0
+                ? movie.ratings.map(r => `
+                    <div class="review-item">
+                        <div class="review-header">
+                            <strong>${r.username}</strong>
+                            <span class="review-rating">${r.rating}/5</span>
+                        </div>
+                        ${r.comment ? `<p class="review-comment">${r.comment}</p>` : ''}
+                    </div>
+                `).join('')
+                : '<p class="empty-small">Hinnanguid pole veel.</p>';
+
+            const ratingForm = currentUser ? `
+                <div class="rate-section">
+                    <h4>Anna hinne</h4>
+                    <div class="star-select">
+                        ${[1,2,3,4,5].map(n => `
+                            <button class="star-btn" onclick="selectRating(${n}, ${id})" id="star-${n}">
+                                ${n}
+                            </button>
+                        `).join('')}
+                    </div>
+                    <input type="text" id="rating-comment" placeholder="Kommentaar (valikuline)">
+                    <button class="btn btn-primary" onclick="submitRating(${id})">Saada hinne</button>
+                    <div id="rating-msg" style="display:none;"></div>
+                </div>
+            ` : `<p class="login-hint"><a href="#" onclick="showLogin()">Logi sisse</a> et hinnata.</p>`;
+
+            document.getElementById('modal-content').innerHTML = `
+                <div class="movie-detail">
+                    <div class="movie-genre">${movie.genre}</div>
+                    <h2>${movie.title}</h2>
+                    <div class="movie-year">${movie.year}</div>
+                    <p>${movie.description}</p>
+                    <div class="avg-rating">
+                        Keskmine hinne: <strong>${movie.avgRating ? `${movie.avgRating}/5` : 'Pole hinnanguid'}</strong>
+                        (${movie.ratingCount} hinnangut)
+                    </div>
+                    ${ratingForm}
+                    <h4>Hinnangud</h4>
+                    <div class="reviews-list">${ratingsHtml}</div>
+                </div>
+            `;
+            document.getElementById('modal').style.display = 'flex';
+        }
+
+        let selectedRating = null;
+
+        function selectRating(n, movieId) {
+            selectedRating = n;
+            [1,2,3,4,5].forEach(i => {
+                const btn = document.getElementById(`star-${i}`);
+                if (btn) btn.className = i <= n ? 'star-btn selected' : 'star-btn';
+            });
+        }
+
+        async function submitRating(movieId) {
+            if (!selectedRating) return;
+            const comment = document.getElementById('rating-comment').value;
+            const msgDiv = document.getElementById('rating-msg');
+
+            const res = await fetch('/api/ratings', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': token
+                },
+                body: JSON.stringify({ movieId, rating: selectedRating, comment })
+            });
+
+            const data = await res.json();
+            msgDiv.textContent = data.message || data.error;
+            msgDiv.className = res.ok ? 'success-msg' : 'error-msg';
+            msgDiv.style.display = 'block';
+
+            if (res.ok) {
+                setTimeout(() => {
+                    closeModal();
+                    loadMovies();
+                }, 1000);
+            }
+        }
+
+        document.getElementById('modal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        init();
+    </script>
+</body>
+</html>

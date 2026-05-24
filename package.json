@@ -1,0 +1,14 @@
+{
+  "name": "filmid-labor",
+  "version": "1.0.0",
+  "description": "Filmisoovituste rakendus — dokumenteerimise labor",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  }
+}
