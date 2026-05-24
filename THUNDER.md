@@ -1,7 +1,7 @@
 # API testimine Thunder Clientiga
 
 Thunder Client on tööriist mis laseb sul testida API päringuid otse VS Code'ist.
-See on lihtsam alternatiiv terminali käskudele.
+Sa näed päringuid ja vastuseid visuaalselt — ilma terminali käskudeta.
 
 ---
 
@@ -19,8 +19,8 @@ Kui VS Code ei ole paigaldatud:
 ## Samm 2 — Paigalda Thunder Client
 
 1. Ava VS Code
-2. Vajuta vasakul paneelil **Extensions** ikoonile (neli ruutu)
-3. Otsinguribale kirjuta: `Thunder Client`
+2. Kliki vasakul paneelil **Extensions** ikoonil (neli ruutu)
+3. Kirjuta otsinguribale: `Thunder Client`
 4. Vajuta **Install**
 5. Pärast paigaldamist ilmub vasakule paneelile pikselabäikese ikoon
 
@@ -28,7 +28,7 @@ Kui VS Code ei ole paigaldatud:
 
 ## Samm 3 — Käivita rakendus
 
-Enne testimist peab rakendus jooksma. Ava terminal ja:
+Ava terminal ja:
 
 ```bash
 cd ~/filmid-labor
@@ -40,74 +40,65 @@ Oota kuni terminal näitab:
 filmid-labor  | Filmide server jookseb: http://localhost:3000
 ```
 
-Ava brauser ja kontrolli: **http://localhost:3000**
+Kontrolli brauseris: **http://localhost:3000**
 
 ---
 
-## Samm 4 — Impordi kollektsioon
+## Samm 4 — Loo esimene päring
 
-Kollektsioon on valmis päringute kogum. Sa ei pea neid käsitsi looma.
+Proovime näha kõiki filme.
 
-1. Kliki VS Code vasakul paneelil **pikselabäikese ikoonil** (Thunder Client)
-2. Vajuta **Collections** sakile
-3. Vajuta kolme punkti ikoonile (`...`) Collections pealkirja kõrval
-4. Vali **Import**
-5. Vali fail `thunder-collection.json` (see on filmid-labor kaustas)
-6. Vajuta **Open**
-
-Nüüd näed vasakul kolme kausta: **Kasutajad**, **Filmid**, **Hinnangud**
-
----
-
-## Samm 5 — Esimene päring
-
-Proovime kõigepealt kõiki filme näha.
-
-1. Ava kaust **Filmid**
-2. Kliki **Kõik filmid**
-3. Vajuta sinist nuppu **Send**
-4. Paremas pooles näed vastust — JSON formaadis filmide nimekiri
-
-Kui näed vastust — toimib!
+1. Kliki VS Code vasakul paneelil **pikselabäikese ikoonil**
+2. Vajuta **New Request**
+3. Ilmub aken — täida nii:
+   - **Meetod:** `GET` (jääb vaikimisi)
+   - **URL:** `http://localhost:3000/api/movies`
+4. Vajuta sinist nuppu **Send**
+5. Paremas pooles näed vastust — filmide nimekiri
 
 ---
 
-## Samm 6 — Sisselogimine
+## Samm 5 — Sisselogimine
 
 Mõned päringud vajavad tokenit. Token saadakse sisselogimisega.
 
-1. Ava kaust **Kasutajad**
-2. Kliki **Logi sisse**
-3. Vaata Body sektsiooni — seal on:
+1. Vajuta **New Request**
+2. Muuda meetod **GET** pealt **POST** peale
+3. URL: `http://localhost:3000/api/users/login`
+4. Kliki **Body** sakile
+5. Vali **JSON**
+6. Kirjuta sisse:
 ```json
 {
   "username": "mari",
   "password": "1234"
 }
 ```
-4. Vajuta **Send**
-5. Vastuses näed `token` välja, näiteks:
+7. Vajuta **Send**
+8. Vastuses näed `token` välja:
 ```json
 {
   "token": "token_1_1748000000000"
 }
 ```
-6. **Kopeeri token väärtus** (ainult tekst, ilma jutumärkideta)
+9. **Kopeeri token väärtus** — seda läheb kohe vaja
 
 ---
 
-## Samm 7 — Tokeni kasutamine
+## Samm 6 — Päring mis vajab tokenit
 
-Mõned päringud vajavad tokenit. Näiteks hinde andmine.
+Näiteks — kes ma olen?
 
-1. Ava kaust **Hinnangud**
-2. Kliki **Lisa hinne**
-3. Vajuta **Headers** sakile
-4. Näed rida `Authorization` — seal on `ASENDA_SIIA_TOKEN`
-5. **Asenda see oma tokeniga** (kopeeri samm 6-st)
-6. Vajuta **Send**
+1. Vajuta **New Request**
+2. Meetod: `GET`
+3. URL: `http://localhost:3000/api/users/me`
+4. Kliki **Headers** sakile
+5. Vajuta **Add Header**
+6. **Name:** `Authorization`
+7. **Value:** kleebi siia oma token (samm 5-st)
+8. Vajuta **Send**
 
-Kui vastuses on `"message": "Hinne lisatud!"` — õnnestus!
+Vastuses näed oma kasutaja infot.
 
 ---
 
@@ -115,82 +106,122 @@ Kui vastuses on `"message": "Hinne lisatud!"` — õnnestus!
 
 ### Kasutajad
 
-| Päring | Meetod | Vajab tokenit |
-|--------|--------|---------------|
-| Registreeru | POST | Ei |
-| Logi sisse | POST | Ei |
-| Praegune kasutaja | GET | Jah |
-| Kõik kasutajad | GET | Ei |
-| Logi välja | POST | Jah |
+**Registreeru**
+- Meetod: `POST`
+- URL: `http://localhost:3000/api/users/signup`
+- Body (JSON):
+```json
+{
+  "name": "Sinu Nimi",
+  "username": "sinunimi",
+  "password": "1234"
+}
+```
 
-### Filmid
+**Logi sisse**
+- Meetod: `POST`
+- URL: `http://localhost:3000/api/users/login`
+- Body (JSON):
+```json
+{
+  "username": "mari",
+  "password": "1234"
+}
+```
 
-| Päring | Meetod | Kirjeldus |
-|--------|--------|-----------|
-| Kõik filmid | GET | Tagastab kõik filmid koos keskmise reitinguga |
-| Üks film (ID järgi) | GET | Tagastab ühe filmi — muuda URL-is number |
-| Otsi filmi | GET | Otsi pealkirja järgi — muuda `title=inception` |
-| Kõik žanrid | GET | Tagastab kõik olemasolevad žanrid |
-| Filmid žanri järgi | GET | Muuda URL-is `draama` teiseks žanriks |
+**Praegune kasutaja**
+- Meetod: `GET`
+- URL: `http://localhost:3000/api/users/me`
+- Headers: `Authorization: SINU_TOKEN`
 
-### Hinnangud
+**Kõik kasutajad**
+- Meetod: `GET`
+- URL: `http://localhost:3000/api/users`
 
-| Päring | Meetod | Vajab tokenit |
-|--------|--------|---------------|
-| Lisa hinne | POST | Jah |
-| Kõik hinnangud | GET | Ei |
-| Filmi hinnangud | GET | Ei — muuda URL-is number |
-| Kasutaja hinnangud | GET | Ei — muuda URL-is number |
+**Logi välja**
+- Meetod: `POST`
+- URL: `http://localhost:3000/api/users/logout`
+- Headers: `Authorization: SINU_TOKEN`
 
 ---
 
-## Päringute muutmine
+### Filmid
 
-### Filmi ID muutmine
+**Kõik filmid**
+- Meetod: `GET`
+- URL: `http://localhost:3000/api/movies`
 
-Vaikimisi on filmide URL `http://localhost:3000/api/movies/1` — see on film nr 1.
+**Üks film**
+- Meetod: `GET`
+- URL: `http://localhost:3000/api/movies/1`
+- Muuda `1` teiseks numbriks et näha teist filmi (1-10)
 
-Et näha filmi nr 3, muuda URL-is number:
+**Otsi filmi**
+- Meetod: `GET`
+- URL: `http://localhost:3000/api/movies/search?title=inception`
+- Muuda `inception` teiseks otsisõnaks
+
+**Kõik žanrid**
+- Meetod: `GET`
+- URL: `http://localhost:3000/api/movies/genres`
+
+**Filmid žanri järgi**
+- Meetod: `GET`
+- URL: `http://localhost:3000/api/movies/genre/draama`
+- Muuda `draama` teiseks žanriks: `krimi`, `sci-fi`, `action`
+
+---
+
+### Hinnangud
+
+**Lisa hinne**
+- Meetod: `POST`
+- URL: `http://localhost:3000/api/ratings`
+- Headers: `Authorization: SINU_TOKEN`
+- Body (JSON):
+```json
+{
+  "movieId": 1,
+  "rating": 5,
+  "comment": "Suurepärane film!"
+}
 ```
-http://localhost:3000/api/movies/3
-```
+- Muuda `movieId` (1-10) ja `rating` (1-5)
 
-### Otsingu muutmine
+**Kõik hinnangud**
+- Meetod: `GET`
+- URL: `http://localhost:3000/api/ratings`
 
-Vaikimisi otsib päring `inception`. Et otsida teist filmi:
-```
-http://localhost:3000/api/movies/search?title=matrix
-```
+**Filmi hinnangud**
+- Meetod: `GET`
+- URL: `http://localhost:3000/api/ratings/movie/1`
+- Muuda `1` filmi numbriga
 
-### Žanri muutmine
-
-Vaikimisi on žanr `draama`. Et näha krimi filme:
-```
-http://localhost:3000/api/movies/genre/krimi
-```
-
-Olemasolevad žanrid: `draama`, `krimi`, `sci-fi`, `action`
+**Kasutaja hinnangud**
+- Meetod: `GET`
+- URL: `http://localhost:3000/api/ratings/user/1`
+- Muuda `1` kasutaja numbriga
 
 ---
 
 ## Probleemide lahendamine
 
-**Vastus on `Could not connect`**
+**Vastus on "Could not connect"**
 
-Rakendus ei jookse. Käivita terminal ja:
+Rakendus ei jookse. Ava terminal:
 ```bash
 cd ~/filmid-labor
 docker compose up --build
 ```
 
-**Vastus on `401 Unauthorized`**
+**Vastus on 401 Unauthorized**
 
-Token puudub või on vale. Logi uuesti sisse ja kopeeri token uuesti.
+Token puudub või on vale. Logi uuesti sisse ja kopeeri token uuesti Headers sektsiooni.
 
-**Vastus on `404 Not Found`**
+**Vastus on 404 Not Found**
 
-URL on vale või ID ei eksisteeri. Kontrolli URL-i.
+URL on vale. Kontrolli URL-i kirjavigu.
 
-**Ei näe Thunder Clienti VS Code-is**
+**Vastus on 400 Bad Request**
 
-Otsi Extensions menüüst `Thunder Client` ja paigalda uuesti.
+Body on vale. Kontrolli kas JSON on õige formaadis.
