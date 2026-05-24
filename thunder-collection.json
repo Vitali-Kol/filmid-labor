@@ -1,0 +1,200 @@
+{
+  "clientName": "Thunder Client",
+  "collectionName": "Filmid Labor",
+  "collectionId": "filmid-labor-001",
+  "dateExported": "2026-05-24",
+  "version": "1.2",
+  "folders": [
+    {
+      "id": "folder-users",
+      "name": "Kasutajad",
+      "containerId": ""
+    },
+    {
+      "id": "folder-movies",
+      "name": "Filmid",
+      "containerId": ""
+    },
+    {
+      "id": "folder-ratings",
+      "name": "Hinnangud",
+      "containerId": ""
+    }
+  ],
+  "requests": [
+    {
+      "id": "req-01",
+      "colId": "filmid-labor-001",
+      "containerId": "folder-users",
+      "name": "Registreeru",
+      "url": "http://localhost:3000/api/users/signup",
+      "method": "POST",
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"name\": \"Sinu Nimi\",\n  \"username\": \"sinunimi\",\n  \"password\": \"1234\"\n}"
+      },
+      "tests": []
+    },
+    {
+      "id": "req-02",
+      "colId": "filmid-labor-001",
+      "containerId": "folder-users",
+      "name": "Logi sisse",
+      "url": "http://localhost:3000/api/users/login",
+      "method": "POST",
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"username\": \"mari\",\n  \"password\": \"1234\"\n}"
+      },
+      "tests": []
+    },
+    {
+      "id": "req-03",
+      "colId": "filmid-labor-001",
+      "containerId": "folder-users",
+      "name": "Praegune kasutaja",
+      "url": "http://localhost:3000/api/users/me",
+      "method": "GET",
+      "headers": [
+        { "name": "Authorization", "value": "ASENDA_SIIA_TOKEN" }
+      ],
+      "body": { "type": "none" },
+      "tests": []
+    },
+    {
+      "id": "req-04",
+      "colId": "filmid-labor-001",
+      "containerId": "folder-users",
+      "name": "Kõik kasutajad",
+      "url": "http://localhost:3000/api/users",
+      "method": "GET",
+      "headers": [],
+      "body": { "type": "none" },
+      "tests": []
+    },
+    {
+      "id": "req-05",
+      "colId": "filmid-labor-001",
+      "containerId": "folder-users",
+      "name": "Logi välja",
+      "url": "http://localhost:3000/api/users/logout",
+      "method": "POST",
+      "headers": [
+        { "name": "Authorization", "value": "ASENDA_SIIA_TOKEN" }
+      ],
+      "body": { "type": "none" },
+      "tests": []
+    },
+    {
+      "id": "req-06",
+      "colId": "filmid-labor-001",
+      "containerId": "folder-movies",
+      "name": "Kõik filmid",
+      "url": "http://localhost:3000/api/movies",
+      "method": "GET",
+      "headers": [],
+      "body": { "type": "none" },
+      "tests": []
+    },
+    {
+      "id": "req-07",
+      "colId": "filmid-labor-001",
+      "containerId": "folder-movies",
+      "name": "Üks film (ID järgi)",
+      "url": "http://localhost:3000/api/movies/1",
+      "method": "GET",
+      "headers": [],
+      "body": { "type": "none" },
+      "tests": []
+    },
+    {
+      "id": "req-08",
+      "colId": "filmid-labor-001",
+      "containerId": "folder-movies",
+      "name": "Otsi filmi",
+      "url": "http://localhost:3000/api/movies/search?title=inception",
+      "method": "GET",
+      "headers": [],
+      "body": { "type": "none" },
+      "tests": []
+    },
+    {
+      "id": "req-09",
+      "colId": "filmid-labor-001",
+      "containerId": "folder-movies",
+      "name": "Kõik žanrid",
+      "url": "http://localhost:3000/api/movies/genres",
+      "method": "GET",
+      "headers": [],
+      "body": { "type": "none" },
+      "tests": []
+    },
+    {
+      "id": "req-10",
+      "colId": "filmid-labor-001",
+      "containerId": "folder-movies",
+      "name": "Filmid žanri järgi",
+      "url": "http://localhost:3000/api/movies/genre/draama",
+      "method": "GET",
+      "headers": [],
+      "body": { "type": "none" },
+      "tests": []
+    },
+    {
+      "id": "req-11",
+      "colId": "filmid-labor-001",
+      "containerId": "folder-ratings",
+      "name": "Lisa hinne",
+      "url": "http://localhost:3000/api/ratings",
+      "method": "POST",
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "ASENDA_SIIA_TOKEN" }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"movieId\": 1,\n  \"rating\": 5,\n  \"comment\": \"Suurepärane film!\"\n}"
+      },
+      "tests": []
+    },
+    {
+      "id": "req-12",
+      "colId": "filmid-labor-001",
+      "containerId": "folder-ratings",
+      "name": "Kõik hinnangud",
+      "url": "http://localhost:3000/api/ratings",
+      "method": "GET",
+      "headers": [],
+      "body": { "type": "none" },
+      "tests": []
+    },
+    {
+      "id": "req-13",
+      "colId": "filmid-labor-001",
+      "containerId": "folder-ratings",
+      "name": "Filmi hinnangud",
+      "url": "http://localhost:3000/api/ratings/movie/1",
+      "method": "GET",
+      "headers": [],
+      "body": { "type": "none" },
+      "tests": []
+    },
+    {
+      "id": "req-14",
+      "colId": "filmid-labor-001",
+      "containerId": "folder-ratings",
+      "name": "Kasutaja hinnangud",
+      "url": "http://localhost:3000/api/ratings/user/1",
+      "method": "GET",
+      "headers": [],
+      "body": { "type": "none" },
+      "tests": []
+    }
+  ]
+}
